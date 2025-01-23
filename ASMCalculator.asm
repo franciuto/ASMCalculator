@@ -6,19 +6,21 @@
 .data
 ; Variabili
 ; Dati
-   op_input              db          12, ?, 11 dup('$')                  ; Limito l'input a (16 bit number) + (operator) + (16 bit number)
-   input_counter         dw          0                                   ; Variabile per contenere l'indice di input
-   result                dw          0                                   ; Variabile d'appoggio per conversioni
-   op1                   dw          0                                   ; Operando 1
-   op2                   dw          0                                   ; Operando 2
-   op                    db          1, 1 dup(0)                         ; Operazione da svolgere
-   int_lenght            db          2, 1 dup(0)                         ; Variabile per salvare la lunghezza del primo numero
+   op_input              db          12, ?, 11 dup('$')       ; Limito l'input a (16 bit number) + (operator) + (16 bit number)
+   input_counter         dw          0                        ; Variabile per contenere l'indice di input
+   result                dw          0                        ; Variabile d'appoggio per conversioni
+   op1                   dw          0                        ; Operando 1
+   op2                   dw          0                        ; Operando 2
+   op                    db          1, 1 dup(0)              ; Operazione da svolgere
+   int_lenght            db          2, 1 dup(0)              ; Variabile per salvare la lunghezza del primo numero
+   buffer                dw          0
    
 ; Stringhe
    welcome               db          'Calcolatrice - Operatori supportati +,-,*,/,^,!,&,|,...$'
    divider               db          10,13, '-----------------------------------------------------------$'  
    error                 db          10, 13, 'ERROR!!'    
-   counter_string        db          10, 13, 5 dup('$')                  ; Variabile per salvare il counter input come variabile salvabile 
+   counter_string        db          10, 13, 5 dup('$')       ; Variabile per salvare il counter input come variabile salvabile
+   result_string         db          10, 13, 5 dup('$')       ; Variabile per salvare i risultati delle operazioni 
       
 .code
 main proc
@@ -82,27 +84,23 @@ main proc
    cmp op , '+'
    je case_sum
    cmp op , '-'
-   je case_subtraction
-   cmp op , '*'
-   je case_operation
-   cmp op , '/'
-   je case_division
 
-
-
-
+   
 
 
 case_sum:
-case_subtraction:
-case_division:
-case_power:
-case_root:
-case_factorial:
-case_or:
-case_and:    
-                 
-           
+   push op1
+   push op2
+   call operationSum
+   jmp print_res
+   
+   
+   
+   
+print_res:
+   mov ah , 9h
+   lea dx , result_string
+   int 21h           
 
 
 
@@ -140,7 +138,8 @@ getString proc
       mov [si] , dl                 ; Aggiungo in stringa
       inc si
       loop string_composer
-      mov result, dx 
+      mov result, dx
+   mov buffer , 0                   ; Reset del buffer 
    ret  
 getString endp   
 
@@ -229,5 +228,34 @@ errorPrinter proc
 errorPrinter endp 
 
 
-fine:
-ret 
+; PROCEDURE PER OPERAZIONI
+
+; Procedura - operationSum
+   ; Procedura che esegue la somma di due operandi
+   
+   ; - Parametri -
+   ; Operando 1 = Salvato in una variabile il cui indirizzo è passato tramite lo stack e salvato in cx
+   ; Operando 2 = Salvato in una variabile il cui indirizzo è passato tramite lo stack e salvato in bx
+   ; Risultato = Salvato in una variabile il cui indirizzo è passato tramite lo stack e salvato in  
+   
+   ; - Ritorno -
+   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+  
+operationSum proc
+   ; Salvataggio dati
+      pop di                          ; Salvo indirizzo di ritorno in si
+      pop bx                          ; Salvo il secondo operando in bx
+      pop cx                          ; Salvo il primo operando in cx   
+   ; Somma
+      add bx , cx                     ; Faccio la somma (Risultato in bx)
+   ; Salvataggio 
+      mov buffer , bx                 ; Salvo risultato nel buffer
+      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
+      call getString                  ; Converto da intero a stringa
+   ; Ritorno
+      push di                            ; Ripristino indirizzo di ritorno
+      ret                               
+operationSum endp 
+
+fine:                                                                    
+ret       
