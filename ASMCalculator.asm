@@ -4,6 +4,7 @@
 .model SMALL
 .stack 100h
 .data
+; Variabili - Fontanesi
 ; Dati
    op_input              db          12, ?, 11 dup('$')                  ; Limito l'input a (16 bit number) + (operator) + (16 bit number)
    input_counter         dw          0                                   ; Variabile per contenere l'indice di input
@@ -34,22 +35,22 @@ main proc
       lea dx , divider
       int 21h
 
-; INPUT PROMPT
-   ; Incremento prompt counter
-      inc input_counter
-      mov ax , input_counter 
-      lea si , counter_string + 2
-      mov result , 0
-      call getString
+; INPUT PROMPT - Rossetti
+   ; Incremento prompt counter      
+      inc input_counter                ; Incremento l'input counter per tenere traccia delle operazioni inserite
+      mov ax , input_counter           ; Sposto in ax il counter
+      lea si , counter_string + 2      ; Salvo l'indirizzo della stringa + 2 in SI (per la funzione)
+      mov result , 0                   ; Inizializzo il result
+      call getString                   ; Chiamo la procedura per la conversione da intero a stringa
    ; Stampa counter
-      mov ah , 9h
+      mov ah , 9h                   
       lea dx , counter_string 
       int 21h
    ; Stampa parentesi
       mov ah , 2h
       mov dl , ']'
       int 21h
-   ; 
+   ; Stampa spazio 
       mov dl , ' '
       int 21h
  
@@ -60,32 +61,53 @@ main proc
       int 21h
       
 ; ANALISI INPUT - Fontanesi
-   ; Setup getInt
-      lea si , op_input                                                  
-      mov result , 0                                                     ; Reset di result    
+   ; Setup getInt                      
+      lea si , op_input                ; Carico l'offset dell'operando in si (per la procedura)                                  
+      mov result , 0                   ; Reset di result    
    ; Chiamata getInt per op1
-      call getInt
-      mov ax , result
-      mov op1, ax
+      call getInt                      ; Chiamo la procedura per ottenere il primo operando
+      mov ax , result                  ; Salvo l'output della procedura in ax
+      mov op1, ax                      ; Sposto il risultato in op1
    ; Chiamata getOperator                
-      call getOperator
+      call getOperator                 ; Chiamo la procedura per estrarre l'operatore
    ; Setup getInt
-      dec si         
-      mov result , 0                                                     ; Reset di result 
+      dec si                           ; Decremento si (debug)
+      mov result , 0                   ; Reset di result 
    ; Chiamata getInt per op2
-      call getInt
-      mov ax , result
-      mov op2, ax
+      call getInt                      ; Chiamo la procedura per ottenere il secondo numero
+      mov ax , result                  ; Salvo il risultato della procedura in ax
+      mov op2, ax                      ; Sposto il risultato in op2
          
-      
-                
+; SCELTA OPERAZIONE - Fontanesi
+   cmp op , '+'
+   je case_sum
+   cmp op , '-'
+   je case_subtraction
+   cmp op , '*'
+   je case_operation
+   cmp op , '/'
+   je case_division
+
+
+
+
+
+
+case_sum:
+case_subtraction:
+case_division:
+case_power:
+case_root:
+case_factorial:
+case_or:
+case_and:    
+                 
            
 
 
 
-           
+; Procedure           
 ; ------------------------------------------------------------------------------------------------------------------------------------
-;  PROCEDURE
  
  
 ; PROCEDURA - getString - Fontanesi - 20m
@@ -190,4 +212,22 @@ getOperator proc
 getOperator endp
 
 
+; Procedura - errorPrinter - Fontanesi - 2m
+   ; Procedura che stampa "ERORR!!" se chiamata
+   
+   ; - Parametri -
+   ; Nessuno
+   
+   ; - Return -
+   ; Alla fine della stampa
+   
+errorPrinter proc
+   mov ah , 9h
+   lea dx , error
+   int 21h
+   ret
+errorPrinter endp 
+
+
+fine:
 ret 
