@@ -4,7 +4,7 @@
 .model SMALL
 .stack 100h
 .data
-; Variabili - Fontanesi
+; Variabili
 ; Dati
    op_input              db          12, ?, 11 dup('$')                  ; Limito l'input a (16 bit number) + (operator) + (16 bit number)
    input_counter         dw          0                                   ; Variabile per contenere l'indice di input
@@ -35,7 +35,7 @@ main proc
       lea dx , divider
       int 21h
 
-; INPUT PROMPT - Rossetti
+; INPUT PROMPT
    ; Incremento prompt counter      
       inc input_counter                ; Incremento l'input counter per tenere traccia delle operazioni inserite
       mov ax , input_counter           ; Sposto in ax il counter
@@ -60,7 +60,7 @@ main proc
       lea dx , op_input
       int 21h
       
-; ANALISI INPUT - Fontanesi
+; ANALISI INPUT
    ; Setup getInt                      
       lea si , op_input                ; Carico l'offset dell'operando in si (per la procedura)                                  
       mov result , 0                   ; Reset di result    
@@ -78,7 +78,7 @@ main proc
       mov ax , result                  ; Salvo il risultato della procedura in ax
       mov op2, ax                      ; Sposto il risultato in op2
          
-; SCELTA OPERAZIONE - Fontanesi
+; SCELTA OPERAZIONE
    cmp op , '+'
    je case_sum
    cmp op , '-'
@@ -110,7 +110,7 @@ case_and:
 ; ------------------------------------------------------------------------------------------------------------------------------------
  
  
-; PROCEDURA - getString - Fontanesi - 20m
+; PROCEDURA - getString
    ; Procedura per la trasformazione di un'intero in una striinga
    
    ; - Parametri -
@@ -145,7 +145,7 @@ getString proc
 getString endp   
 
 
-; PROCEDURA - getInt - Fontanesi - 30m
+; PROCEDURA - getInt
    ; Procedura per la trasformazione di soli numeri contenuti in una stringa in un'intero unsigned massimo 16 bit
    
    ; - Parametri -
@@ -187,7 +187,7 @@ getInt proc
 getInt endp
 
 
-; PROCEDURA - getOperator - Fontanesi - 5m 
+; PROCEDURA - getOperator
    ; Procedura che ottiene l'operazione da effettuare e la salva in una variabile
    
    ; - Parametri -
@@ -212,7 +212,7 @@ getOperator proc
 getOperator endp
 
 
-; Procedura - errorPrinter - Fontanesi - 2m
+; Procedura - errorPrinter
    ; Procedura che stampa "ERORR!!" se chiamata
    
    ; - Parametri -
