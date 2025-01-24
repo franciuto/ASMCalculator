@@ -1,5 +1,19 @@
-; Francesco Fontanesi XX/XX/XX
-; Consegna
+; Francesco Fontanesi 01/24/2025 - CALCOLATRICE ASSEMBLY 
+
+; - Operazioni supportate -
+; Calcolatrice in grado di eseguire le seguenti operazioni:
+; 1) Somma
+; 2) Sottrazione
+; 3) Moltiplicazione
+; 4) Divisione
+; 5) Potenza
+; 6) Fattoriale
+; 7) And bitwise
+; 8) Or bitwise
+; 9) Radice quadrata
+
+; - Numeri supportati - 
+; Il programma supporta numeri di tipo UNSIGNED, INTERI per una lunghezza massima di 16 BIT (ossia fino a 65535)  
 
 .model SMALL
 .stack 100h
@@ -20,7 +34,8 @@
    error                 db          10, 13, 'ERROR!!$'    
    counter_string        db          10, 13, 7 dup('$')       ; Variabile per salvare il counter input come variabile salvabile
    result_string         db          8, ?, 7 dup('$')         ; Variabile per salvare i risultati delle operazioni
-   result_is             db          10, 13, '= $'            ; Variabile per stampare l'uguale 
+   result_is             db          10, 13, '= $'            ; Variabile per stampare l'uguale   
+   bye                   db          10, 13, 'bye...$'
    
       
 .code
@@ -28,7 +43,8 @@ main proc
 ; Caricamento data segment
    mov ax , @data
    mov ds , ax
-
+         
+         
 ; INTRO
    ; Welcome
       mov ah , 9h
@@ -36,7 +52,9 @@ main proc
       int 21h
    ; Text Divider
       lea dx , divider
-      int 21h
+      int 21h 
+      
+      
 rerun:                                 ; Punto di ingresso per eseguire nuovamente il programma dopo che un'operazione è terminata
 ; INIZIALIZZAZIONE VARIABILI 
    ; Inizializza result_string
@@ -64,13 +82,15 @@ rerun:                                 ; Punto di ingresso per eseguire nuovamen
    ; Stampa spazio 
       mov dl , ' '
       int 21h
- 
+        
+        
 ; RICHIESTA INPUT
    ; Input
       mov ah , 0ah
       lea dx , op_input
       int 21h
-      
+        
+        
 ; ANALISI INPUT
    ; Setup getInt                      
       lea si , op_input                ; Carico l'offset dell'operando in si (per la procedura)                                  
@@ -88,6 +108,7 @@ rerun:                                 ; Punto di ingresso per eseguire nuovamen
       call getInt                      ; Chiamo la procedura per ottenere il secondo numero
       mov ax , result                  ; Salvo il risultato della procedura in ax
       mov op2, ax                      ; Sposto il risultato in op2
+      
          
 ; SCELTA OPERAZIONE
    cmp op , '+'
@@ -105,8 +126,12 @@ rerun:                                 ; Punto di ingresso per eseguire nuovamen
    cmp op , '!'
    je case_fact
    cmp op , '&'
-   je case_and
+   je case_and 
+   cmp op , '|'
+   je case_or
    cmp op , 'x'
+   je case_exit
+   cmp op , 'X'
    je case_exit
 
    
@@ -165,15 +190,21 @@ rerun:                                 ; Punto di ingresso per eseguire nuovamen
          push op2                      ; Push secondo operando in stack
          call operationAnd             ; Chiamata della procedura
          jmp print_res                 ; Al ritorno della procedura vado a stampare il risultato
-         
+   
+   ; Or
+      case_or:
+         push op1 
+         push op2
+         call operationOr
+         jmp print_res      
                     
    ; Uscita dal programma
-      case_exit:
-         jmp fine 
+      case_exit: 
+         mov ah , 9h
+         lea dx , bye
+         int 21h
+         jmp fine  
 
-   
-
-   
    
 ; STAMPA RISULTATO
 print_res:
@@ -528,10 +559,53 @@ operationFact endp
    ; Procedura che esegue l'operazione and bitwise tra due numeri
    
    ; - Parametri - 
-   ; 
+   ; Operatore 1 = Passato tramite stack e salvato in ax
+   ; Operatore 2 = Passato tramite stack e salvato in cx
+   
+   ; - Return - 
+   ; Ritorna quando viene terminata la conversione 
    
 operationAnd proc
-     
+   ; Salvataggio dati
+   pop di                          ; Salvo indirizzo di ritorno in di
+   pop cx                          ; Salvo il secondo operando in cx
+   pop ax                          ; Salvo il primo operando in ax   
+   ; Operazione
+   and ax , cx 
+   ; Conversione
+   lea si , result_string + 2
+   call getString
+   ; Ritorno
+   push di
+   ret  
 operationAnd endp
-fine:                                                                    
-   hlt      
+
+
+; Procedura - operationOr
+   ; Procedura che esegue l'operazione or bitwise tra due numeri
+  
+   ; - Parametri - 
+   ; Operatore 1 = Passatro tramite stack e salvato in ax
+   ; Operatore 2 = Passato tramite stacke e salvato in cx
+   
+   ; - Return - 
+   ; Ritorna quando termina la conversione
+   
+operationOr proc
+   ; Salvataggio dati
+   pop di                          ; Salvo indirizzo di ritorno in di
+   pop cx                          ; Salvo il secondo operando in cx
+   pop ax                          ; Salvo il primo operando in ax   
+   ; Operazione
+   or ax , cx
+   ; Conversione
+   lea si , result_string + 2
+   call getString
+   ; Ritorno
+   push di
+   ret   
+operationOr endp
+
+; FINE
+   fine:                                                                    
+      hlt
