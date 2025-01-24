@@ -15,6 +15,11 @@
 ; - Numeri supportati - 
 ; Il programma supporta numeri di tipo UNSIGNED, INTERI per una lunghezza massima di 16 BIT (ossia fino a 65535)  
 
+; !! ATTENZIONE !!
+; emu8086 utilizza un un layout di tastiera americana US per l'input di conseguenza è NECESSARIO modificare il proprio layout tastiera
+; E consultare un layou americano per selezionare le operazioni, in alternativa è possibile modificare le assegnazioni 
+; Modificando il blocco "SCELTA OPERAZIONE"
+
 .model SMALL
 .stack 100h
 .data
