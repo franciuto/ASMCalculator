@@ -18,7 +18,7 @@ La calcolatrice può eseguire le seguenti operazioni:
 9. **Radice quadrata**
 
 ## Dettagli Tecnici
-- **Numeri supportati:** interi non firmati (unsigned) a 16 bit (0 - 65535).
+- **Numeri supportati:** interi unsigned a 16 bit (0 - 65535).
 - **Input:** Il programma utilizza il layout di tastiera americana (US).
   - Se stai utilizzando un layout diverso, consulta una tabella della tastiera americana o modifica il blocco di codice per la selezione delle operazioni.
 
