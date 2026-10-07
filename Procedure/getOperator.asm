@@ -1,23 +1,23 @@
-; PROCEDURA - getOperator
-   ; Procedura che ottiene l'operazione da effettuare e la salva in una variabile
+; PROCEDURE - getOperator
+   ; Retrieves the operator and stores it in a variable
    
-   ; - Parametri -
-   ; Input completo utente = Scambiato tramite la variabile "op_input"
-   ; Operatore = Salvato dalla procedura nella variabile "op"     
+   ; - Parameters -
+   ; Complete user input = Passed through the "op_input" variable
+   ; Operator = Stored by the procedure in the "op" variable
    
    ; - Return - 
-   ; Ritorna quando termina l'operazione di get dell'operando
+   ; Returns when operator retrieval is complete
          
 getOperator proc
-   ; Inizializzazione
+   ; Initialization
       mov op , 0
    ; Get                           
-      lea si , op_input            ; Carico in si l'offset dell'input
-      mov bl , int_lenght          ; Carico il numero di cifre del primo numero in bl                 
-      xor bh , bh                  ; Pulisco bh
-      add si , bx                  ; Aggiungo all'offset le cifre già scambiate 
-      add si , 2                   ; Punto al valore corretto
-      mov bx , [si]                ; Carico in bx il valore puntato (operatore)
-      mov op , bl                  ; Salvo l'operatore nella variabile di scambio "op"
+      lea si , op_input            ; Load the input offset into SI
+      mov bl , int_lenght          ; Load the number of digits in the first number into BL
+      xor bh , bh                  ; Clear BH
+      add si , bx                  ; Advance past the digits already read
+      add si , 2                   ; Point to the correct value
+      mov bx , [si]                ; Load the pointed-to value (operator) into BX
+      mov op , bl                  ; Store the operator in the "op" variable
    ret     
 getOperator endp

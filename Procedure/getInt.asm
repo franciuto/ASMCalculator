@@ -1,40 +1,40 @@
-; PROCEDURA - getInt
-   ; Procedura per la trasformazione di soli numeri contenuti in una stringa in un'intero unsigned massimo 16 bit
+; PROCEDURE - getInt
+   ; Converts digits in a string to a 16-bit unsigned integer
    
-   ; - Parametri -
-   ; Stringa da trasformare = Salvata in una variabile il cui offset è passato in SI
-   ; Numero intero trasformato = Salvato nella variabile 'result' 
+   ; - Parameters -
+   ; Source string = Stored in a variable whose offset is passed in SI
+   ; Converted integer = Stored in the 'result' variable
    
    ; - Return -
-   ; La procedura ritorna quando il valore analizzato non è più un numero
-   ; Se il valore è minore di '0'
-   ; Se il valore è maggiore di '0' ma non minore di '9'
+   ; Returns when the current value is not a digit:
+   ; when it is lower than '0', or higher than '9'.
    
+
 getInt proc
-   add si , 2                      ; Incremento SI di 2 per andare al primo valore utile della variabile
-   mov int_lenght , 0              ; Inizializzazione variabile lunghezza operatore1   
+   add si , 2                      ; Advance SI by 2 to the variable's first useful value
+   mov int_lenght , 0              ; Initialize the first operand length variable
    
    analisi:
-      cmp [si] , '0'               ; Faccio un controllo tra il contenuto dell'offset (numero da analizzare) e il codice ascii dello 0
-      jae is_above0                ; Se il valore è maggiore uguale a '0' allora passo ad un'altro controllo
-      ret                          ; Se il valore non è maggiore di 0 allora non è sicuramente un numero (return)
+      cmp [si] , '0'               ; Compare the current character with the ASCII code for 0
+      jae is_above0                ; If it is greater than or equal to '0', perform another check
+      ret                          ; Otherwise, it is not a number; return
    
    is_above0:
-      cmp [si] , '9'               ; Se il valore è anche minore di '9' allora è indubbiamente un numero
-      jbe is_number                ; Il valore è un numero, salto al codice successivo
-      ret                          ; Se il valore è maggiore di 0 ma non minore di 9 allora non è sicuramente un numero (return)
+      cmp [si] , '9'               ; If it is also lower than or equal to '9', it is a digit
+      jbe is_number                ; The value is a number; continue
+      ret                          ; Otherwise, it is not a number; return
       
    is_number:
-      inc int_lenght               ; Tengo traccia di quanti numeri sono stati convertiti  
-      mov bx , 10                  ; Muovi il divisore
-      xor ah , ah                  ; Pulisco ah
-      mov al , [si]                ; Sposta in ax il contenuto della variabile (Numero da convertire)
-      sub al , '0'                 ; Converti in decimale 
-      mov cx , ax                  ; Sposta il numero corrente in CX
-      mov ax , result              ; Carico il risultato definitivo in AX
-      mul bx                       ; ax = ax * 10 (sposta a sinistra le cifre)
-      add ax , cx                  ; Somma il nuovo numero come unità
-      mov result , ax              ; Salva il nuovo risultato
-      inc si                       ; Passa al prossimo carattere
-      jmp analisi                  ; Quando il carattere attuale è stato convertito si procede con l'analisi stringa
+      inc int_lenght               ; Track how many digits have been converted
+      mov bx , 10                  ; Set the multiplier
+      xor ah , ah                  ; Clear AH
+      mov al , [si]                ; Move the character to AX for conversion
+      sub al , '0'                 ; Convert to decimal
+      mov cx , ax                  ; Move the current number to CX
+      mov ax , result              ; Load the accumulated result into AX
+      mul bx                       ; AX = AX * 10 (shift digits left)
+      add ax , cx                  ; Add the new digit as the units value
+      mov result , ax              ; Store the new result
+      inc si                       ; Move to the next character
+      jmp analisi                  ; Analyze the next character
 getInt endp

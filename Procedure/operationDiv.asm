@@ -1,24 +1,24 @@
-; Procedura - operationDiv
-   ; Procedura che esegue la divisione di due numeri unsigned 16 bit passati tramite stack
+; PROCEDURE - operationDiv
+   ; Divides two 16-bit unsigned numbers passed on the stack
    
-   ; - Parametri - 
-   ; Operando 1 = Passato tramite stack e salvato in ax
-   ; Operando 2 = Passato tramite stack e salvato in bx
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in AX
+   ; Operand 2 = Passed on the stack and stored in BX
    
    ; - Return -
-   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+   ; Returns when the result has been converted to a printable string
 
 operationDiv proc 
-   ; Salvataggio dati
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop bx                          ; Salvo il secondo operando in bx
-      pop ax                          ; Salvo il primo operando in ax   
-   ; Divisione 
+   ; Save data
+      pop di                          ; Save the return address in DI
+      pop bx                          ; Save the second operand in BX
+      pop ax                          ; Save the first operand in AX
+   ; Division
       div cx
-   ; Conversione parte intera
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
+   ; Convert the integer part
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
       push di
       ret 
 operationDiv endp 

@@ -1,30 +1,30 @@
-; Procedura - operationSqrt
-   ; Procedura che trova la radice quadrata di un numero in stack
+; PROCEDURE - operationSqrt
+   ; Finds the square root of a number passed on the stack
    
-   ; - Parametri - 
-   ; Operando 1 = Passato tramite stack e salvato in bx
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in BX
    
    ; - Return -
-   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+   ; Returns when the result has been converted to a printable string
 
 operationSqrt proc
-   ; Salvataggio dati
+   ; Save data
       xor ax , ax
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop bx                          ; Salvo il primo operando in bx  
-   ; Calcolo
-      mov cx , 1                      ; cx = 1 per sottrazioni dispari
+      pop di                          ; Save the return address in DI
+      pop bx                          ; Save the first operand in BX
+   ; Calculation
+      mov cx , 1                      ; CX = 1 for successive odd-number subtractions
       sqrt_loop:
-         sub bx, cx                   ; Sottraggo 1 da ax
-         jl done                      ; Se bx < 0 esco dal loop  
-         add cx, 2                    ; Incremento al prossimo numero dispari
-         inc ax                       ; Incremento risultato della radice quadrata
-      jmp sqrt_loop                   ; Ripeto
+         sub bx, cx                   ; Subtract the current odd number
+         jl done                      ; Exit the loop if BX < 0
+         add cx, 2                    ; Advance to the next odd number
+         inc ax                       ; Increment the square-root result
+      jmp sqrt_loop                   ; Repeat
    done: 
-   ; Conversione
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
+   ; Conversion
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
       push di
       ret 
 operationSqrt endp

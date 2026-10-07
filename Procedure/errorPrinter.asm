@@ -1,11 +1,11 @@
-; Procedura - errorPrinter
-   ; Procedura che stampa "ERORR!!" se chiamata
+; PROCEDURE - errorPrinter
+   ; Prints "ERROR!!" when called
    
-   ; - Parametri -
-   ; Nessuno
+   ; - Parameters -
+   ; None
    
    ; - Return -
-   ; Alla fine della stampa
+   ; Returns after printing
    
 errorPrinter proc
    mov ah , 9h

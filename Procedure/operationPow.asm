@@ -1,28 +1,28 @@
-; Procedura - operationPow
-   ; Procedura che esegue l'elevazione a potenza con parametri passati in stack
+; PROCEDURE - operationPow
+   ; Raises a number to a power using parameters passed on the stack
    
-   ; - Parametri - 
-   ; Operando 1 = Passato tramite stack e salvato in ax
-   ; Operando 2 = Passato tramite stack e salvato in cx
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in AX
+   ; Operand 2 = Passed on the stack and stored in CX
    
    ; - Return -
-   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+   ; Returns when the result has been converted to a printable string
 
 operationPow proc
-   ; Salvataggio dati
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop bx                          ; Salvo il secondo operando (esponente) in cx
-      pop ax                          ; Salvo il primo operando (base) in ax   
-   ; Esponente
-      dec cx                          ; Decremento l'esponente
-      mov bx , op1                    ; Copio la base in bx
-      mult_loop:                      ; Calcolo la potenza
+   ; Save data
+      pop di                          ; Save the return address in DI
+      pop bx                          ; Save the second operand (exponent) in CX
+      pop ax                          ; Save the first operand (base) in AX
+   ; Exponent
+      dec cx                          ; Decrement the exponent
+      mov bx , op1                    ; Copy the base to BX
+      mult_loop:                      ; Calculate the power
          mul bx                       
          loop mult_loop
-   ; Conversione
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
+   ; Conversion
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
       push di
       ret 
 operationPow endp   

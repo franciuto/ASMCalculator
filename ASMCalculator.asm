@@ -1,51 +1,51 @@
-; Francesco Fontanesi 01/24/2025 - CALCOLATRICE ASSEMBLY 
+; Francesco Fontanesi 01/24/2025 - ASSEMBLY CALCULATOR
 
-; - Operazioni supportate -
-; Calcolatrice in grado di eseguire le seguenti operazioni:
-; 1) Somma
-; 2) Sottrazione
-; 3) Moltiplicazione
-; 4) Divisione
-; 5) Potenza
-; 6) Fattoriale
-; 7) And bitwise
-; 8) Or bitwise
-; 9) Radice quadrata
+; - Supported operations -
+; The calculator can perform the following operations:
+; 1) Addition
+; 2) Subtraction
+; 3) Multiplication
+; 4) Division
+; 5) Exponentiation
+; 6) Factorial
+; 7) Bitwise AND
+; 8) Bitwise OR
+; 9) Square root
 
-; - Numeri supportati - 
-; Il programma supporta numeri di tipo UNSIGNED, INTERI per una lunghezza massima di 16 BIT (ossia fino a 65535)  
+; - Supported numbers -
+; The program supports 16-bit unsigned integers (up to 65535).
 
-; !! ATTENZIONE !!
-; emu8086 utilizza un un layout di tastiera americana US per l'input di conseguenza è NECESSARIO modificare il proprio layout tastiera
-; E consultare un layou americano per selezionare le operazioni, in alternativa è possibile modificare le assegnazioni 
-; Modificando il blocco "SCELTA OPERAZIONE"
+; !! WARNING !!
+; emu8086 uses a US keyboard layout for input, so you must change your keyboard layout
+; or refer to a US layout to select operations. Alternatively, change the key mappings
+; in the "OPERATION SELECTION" block.
 
 .model SMALL
 .stack 100h
 .data
-; Variabili
-; Dati
-   op_input              db          12, ?, 11 dup('$')       ; Limito l'input a (16 bit number) + (operator) + (16 bit number)
-   input_counter         dw          0                        ; Variabile per contenere l'indice di input
-   result                dw          0                        ; Variabile d'appoggio per conversioni
-   op1                   dw          0                        ; Operando 1
-   op2                   dw          0                        ; Operando 2
-   op                    db          1, 1 dup(0)              ; Operazione da svolgere
-   int_lenght            db          2, 1 dup(0)              ; Variabile per salvare la lunghezza del primo numero
-   
-; Stringhe
+; Variables
+; Data
+   op_input              db          12, ?, 11 dup('$')       ; Limits input to (16-bit number) + (operator) + (16-bit number)
+   input_counter         dw          0                        ; Stores the input index
+   result                dw          0                        ; Temporary value used for conversions
+   op1                   dw          0                        ; Operand 1
+   op2                   dw          0                        ; Operand 2
+   op                    db          1, 1 dup(0)              ; Operation to perform
+   int_lenght            db          2, 1 dup(0)              ; Stores the length of the first number
+
+; Strings
    welcome               db          'Calcolatrice - Operatori supportati +,-,*,/,^,!,&,|,r (sqrt) $'
    divider               db          10,13, '-----------------------------------------------------------$'  
    error                 db          10, 13, 'ERROR!!$'    
-   counter_string        db          10, 13, 7 dup('$')       ; Variabile per salvare il counter input come variabile salvabile
-   result_string         db          8, ?, 7 dup('$')         ; Variabile per salvare i risultati delle operazioni
-   result_is             db          10, 13, '= $'            ; Variabile per stampare l'uguale   
+   counter_string        db          10, 13, 7 dup('$')       ; Stores the input counter as a printable string
+   result_string         db          8, ?, 7 dup('$')         ; Stores operation results
+   result_is             db          10, 13, '= $'            ; Prints the equals sign
    bye                   db          10, 13, 'bye...$'
    
       
 .code
 main proc
-; Caricamento data segment
+; Load the data segment
    mov ax , @data
    mov ds , ax
          
@@ -60,62 +60,62 @@ main proc
       int 21h 
       
       
-rerun:                                 ; Punto di ingresso per eseguire nuovamente il programma dopo che un'operazione è terminata
-; INIZIALIZZAZIONE VARIABILI 
-   ; Inizializza result_string
-   lea si, result_string+2             ; SI punta al terzo byte
-   mov cx, 7                           ; Conta 7 byte
+rerun:                                 ; Entry point for running the program again after an operation completes
+; VARIABLE INITIALIZATION
+   ; Initialize result_string
+   lea si, result_string+2             ; SI points to the third byte
+   mov cx, 7                           ; Count 7 bytes
    init_loop:                        
-       mov byte ptr [si], '$'          ; Imposta il byte corrente a '$'
-       inc si                          ; Passa al byte successivo
-       loop init_loop                  ; Ripeti fino a che CX = 0
+       mov byte ptr [si], '$'          ; Set the current byte to '$'
+       inc si                          ; Move to the next byte
+       loop init_loop                  ; Repeat until CX = 0
 ; INPUT PROMPT
-   ; Incremento prompt counter      
-      inc input_counter                ; Incremento l'input counter per tenere traccia delle operazioni inserite
-      mov ax , input_counter           ; Sposto in ax il counter
-      lea si , counter_string + 2      ; Salvo l'indirizzo della stringa + 2 in SI (per la funzione)
-      mov result , 0                   ; Inizializzo il result
-      call getString                   ; Chiamo la procedura per la conversione da intero a stringa
-   ; Stampa counter
+   ; Increment the prompt counter
+      inc input_counter                ; Track the number of entered operations
+      mov ax , input_counter           ; Move the counter to AX
+      lea si , counter_string + 2      ; Store the address of the string + 2 in SI (for the procedure)
+      mov result , 0                   ; Initialize result
+      call getString                   ; Convert an integer to a string
+   ; Print counter
       mov ah , 9h                   
       lea dx , counter_string 
       int 21h
-   ; Stampa parentesi
+   ; Print closing bracket
       mov ah , 2h
       mov dl , ']'
       int 21h
-   ; Stampa spazio 
+   ; Print space
       mov dl , ' '
       int 21h
         
         
-; RICHIESTA INPUT
+; INPUT REQUEST
    ; Input
       mov ah , 0ah
       lea dx , op_input
       int 21h
         
         
-; ANALISI INPUT
-   ; Setup getInt                      
-      lea si , op_input                ; Carico l'offset dell'operando in si (per la procedura)                                  
-      mov result , 0                   ; Reset di result    
-   ; Chiamata getInt per op1
-      call getInt                      ; Chiamo la procedura per ottenere il primo operando
-      mov ax , result                  ; Salvo l'output della procedura in ax
-      mov op1, ax                      ; Sposto il risultato in op1
-   ; Chiamata getOperator                
-      call getOperator                 ; Chiamo la procedura per estrarre l'operatore
+; INPUT ANALYSIS
+   ; Set up getInt
+      lea si , op_input                ; Load the operand offset into SI (for the procedure)
+      mov result , 0                   ; Reset result
+   ; Call getInt for op1
+      call getInt                      ; Get the first operand
+      mov ax , result                  ; Save the procedure output in AX
+      mov op1, ax                      ; Move the result to op1
+   ; Call getOperator
+      call getOperator                 ; Extract the operator
    ; Setup getInt
-      dec si                           ; Decremento si (debug)
-      mov result , 0                   ; Reset di result 
-   ; Chiamata getInt per op2
-      call getInt                      ; Chiamo la procedura per ottenere il secondo numero
-      mov ax , result                  ; Salvo il risultato della procedura in ax
-      mov op2, ax                      ; Sposto il risultato in op2
+      dec si                           ; Decrement SI (debug)
+      mov result , 0                   ; Reset result
+   ; Call getInt for op2
+      call getInt                      ; Get the second number
+      mov ax , result                  ; Save the procedure output in AX
+      mov op2, ax                      ; Move the result to op2
       
          
-; SCELTA OPERAZIONE
+; OPERATION SELECTION
    cmp op , '+'
    je case_sum
    cmp op , '-'
@@ -141,60 +141,60 @@ rerun:                                 ; Punto di ingresso per eseguire nuovamen
 
    
 
-; GESTIONE OPERAZIONI
-   ; Somma
+; OPERATION HANDLING
+   ; Addition
       case_sum:
-         push op1                      ; Push primo operando in stack
-         push op2                      ; Push secondo operando in stack
-         call operationSum             ; Chiamata della procedura
-         jmp print_res                 ; Al ritorno della procedura vado a stampare il risultato  
+         push op1                      ; Push the first operand onto the stack
+         push op2                      ; Push the second operand onto the stack
+         call operationSum             ; Call the procedure
+         jmp print_res                 ; Print the result after the procedure returns
          
-   ; Sottrazione
+   ; Subtraction
       case_sub:
-         push op1                      ; Push primo operando in stack
-         push op2                      ; Push secondo operando in stack
-         call operationSub             ; Chiamata della procedura
-         jmp print_res                 ; Al ritorno della procedura vado a stampare il risultato 
+         push op1                      ; Push the first operand onto the stack
+         push op2                      ; Push the second operand onto the stack
+         call operationSub             ; Call the procedure
+         jmp print_res                 ; Print the result after the procedure returns
          
-   ; Moltiplicazione
+   ; Multiplication
       case_mul:
-         push op1                      ; Push primo operando in stack
-         push op2                      ; Push secondo operando in stack
-         call operationMul             ; Chiamata della procedura
-         jmp print_res                 ; Al ritorno della procedura vado a stampare il risultato
+         push op1                      ; Push the first operand onto the stack
+         push op2                      ; Push the second operand onto the stack
+         call operationMul             ; Call the procedure
+         jmp print_res                 ; Print the result after the procedure returns
          
-   ; Divisione
+   ; Division
       case_div:
-         push op1                      ; Push primo operando in stack
-         push op2                      ; Push secondo operando in stack
-         call operationDiv             ; Chiamata della procedura
-         jmp print_res                 ; Al ritorno della procedura vado a stampare il risultato
+         push op1                      ; Push the first operand onto the stack
+         push op2                      ; Push the second operand onto the stack
+         call operationDiv             ; Call the procedure
+         jmp print_res                 ; Print the result after the procedure returns
          
-   ; Potenza
+   ; Exponentiation
       case_pow:
-         push op1                      ; Push primo operando in stack
-         push op2                      ; Push secondo operando in stack
-         call operationPow             ; Chiamata della procedura
-         jmp print_res                 ; Al ritorno della procedura vado a stampare il risultato
+         push op1                      ; Push the first operand onto the stack
+         push op2                      ; Push the second operand onto the stack
+         call operationPow             ; Call the procedure
+         jmp print_res                 ; Print the result after the procedure returns
    
-   ; Radice quadrata
+   ; Square root
       case_sqrt:
-         push op1                      ; Push primo operando in stack
-         call operationSqrt            ; Chiamata della procedura
-         jmp print_res                 ; Al ritorno della procedura vado a stampare il risultato
+         push op1                      ; Push the first operand onto the stack
+         call operationSqrt            ; Call the procedure
+         jmp print_res                 ; Print the result after the procedure returns
    
-   ; Fattoriale
+   ; Factorial
       case_fact: 
-         push op1                      ; Push primo operando in stack
-         call operationFact            ; Chiamata della procedura
-         jmp print_res                 ; Al ritorno della procedura vado a stampare il risultato 
+         push op1                      ; Push the first operand onto the stack
+         call operationFact            ; Call the procedure
+         jmp print_res                 ; Print the result after the procedure returns
   
    ; And
       case_and:
-         push op1                      ; Push primo operando in stack
-         push op2                      ; Push secondo operando in stack
-         call operationAnd             ; Chiamata della procedura
-         jmp print_res                 ; Al ritorno della procedura vado a stampare il risultato
+         push op1                      ; Push the first operand onto the stack
+         push op2                      ; Push the second operand onto the stack
+         call operationAnd             ; Call the procedure
+         jmp print_res                 ; Print the result after the procedure returns
    
    ; Or
       case_or:
@@ -203,7 +203,7 @@ rerun:                                 ; Punto di ingresso per eseguire nuovamen
          call operationOr
          jmp print_res      
                     
-   ; Uscita dal programma
+   ; Exit the program
       case_exit: 
          mov ah , 9h
          lea dx , bye
@@ -211,135 +211,135 @@ rerun:                                 ; Punto di ingresso per eseguire nuovamen
          jmp fine  
 
    
-; STAMPA RISULTATO
+; PRINT RESULT
 print_res:
-   ; Stampa uguale
+   ; Print equals sign
       mov ah , 9h 
       lea dx , result_is
       int 21h
-   ; Stampa numero
+   ; Print number
       lea dx , result_string
       int 21h
-jmp rerun                              ; Rerun per mettere la prossima operazione
+jmp rerun                              ; Run again for the next operation
                                        
            
 
 
 
-; Procedure           
+; Procedures
 ; ------------------------------------------------------------------------------------------------------------------------------------
  
  
-; PROCEDURA - getString
-   ; Procedura per la trasformazione di un'intero in una striinga
+; PROCEDURE - getString
+   ; Converts an integer to a string
    
-   ; - Parametri -
-   ; Numero intero = Passato tramite AX
-   ; Output in stringa = Scambiato tramite una variabile il cui indirizzo è passato in SI 
+   ; - Parameters -
+   ; Integer = Passed through AX
+   ; String output = Written through a variable whose address is passed in SI
    
    ; - Return -  
-   ; La variabile ritorna quando termina la conversione
+   ; Returns when the conversion is complete
   
 getString proc
-   mov bx , 10                      ; Salvo il divisore
-   xor cx , cx                      ; Pulisco cx
-   xor dx , dx                      ; Pulisco dx
+   mov bx , 10                      ; Store the divisor
+   xor cx , cx                      ; Clear CX
+   xor dx , dx                      ; Clear DX
       
    divisione:
-      div bx                        ; Divisione tra ax e 10
-      push dx                       ; Salvo il quoziente ossia la cifra che mi interessa sullo stack
-      xor dx , dx                   ; Resetto per la prossima operazione
-      inc cx                        ; Aumento per tenere conto di tutte le cifre pushate
-      or ax , ax                    ; Controllo se il quoziente è zero
-      jz string_composer            ; Se è zero tutte le cifre sono state pushate (vado alla composizione stringa)
-      jmp divisione                 ; Altrimenti continuo a dividere
+      div bx                        ; Divide AX by 10
+      push dx                       ; Push the remainder, which is the needed digit, onto the stack
+      xor dx , dx                   ; Reset for the next operation
+      inc cx                        ; Count all pushed digits
+      or ax , ax                    ; Check whether the quotient is zero
+      jz string_composer            ; If so, all digits have been pushed; compose the string
+      jmp divisione                 ; Otherwise, keep dividing
          
    string_composer:            
-      pop dx                        ; Prelevo dallo stack salvando in dx (risalgo lo stack)
-      add dl , '0'                  ; Converto in ascii
-      mov [si] , dl                 ; Aggiungo in stringa
-      inc si                        ; Passo al prossimo byte della stringa
+      pop dx                        ; Pop from the stack into DX
+      add dl , '0'                  ; Convert to ASCII
+      mov [si] , dl                 ; Append to the string
+      inc si                        ; Move to the next string byte
       loop string_composer          
-      mov result, dx                ; Salvo risultato in dx
+      mov result, dx                ; Store the result in DX
    ret  
 getString endp   
 
 
-; PROCEDURA - getInt
-   ; Procedura per la trasformazione di soli numeri contenuti in una stringa in un'intero unsigned massimo 16 bit
+; PROCEDURE - getInt
+   ; Converts digits in a string to a 16-bit unsigned integer
    
-   ; - Parametri -
-   ; Stringa da trasformare = Salvata in una variabile il cui offset è passato in SI
-   ; Numero intero trasformato = Salvato nella variabile 'result' 
+   ; - Parameters -
+   ; Source string = Stored in a variable whose offset is passed in SI
+   ; Converted integer = Stored in the 'result' variable
    
    ; - Return -
-   ; La procedura ritorna quando il valore analizzato non è più un numero
-   ; Se il valore è minore di '0'
-   ; Se il valore è maggiore di '0' ma non minore di '9'
+   ; Returns when the current value is not a digit:
+   ; when it is lower than '0', or higher than '9'.
    
+
 getInt proc
-   add si , 2                      ; Incremento SI di 2 per andare al primo valore utile della variabile
-   mov int_lenght , 0              ; Inizializzazione variabile lunghezza operatore1   
+   add si , 2                      ; Advance SI by 2 to the variable's first useful value
+   mov int_lenght , 0              ; Initialize the first operand length variable
    
    analisi:
-      cmp [si] , '0'               ; Faccio un controllo tra il contenuto dell'offset (numero da analizzare) e il codice ascii dello 0
-      jae is_above0                ; Se il valore è maggiore uguale a '0' allora passo ad un'altro controllo
-      ret                          ; Se il valore non è maggiore di 0 allora non è sicuramente un numero (return)
+      cmp [si] , '0'               ; Compare the current character with the ASCII code for 0
+      jae is_above0                ; If it is greater than or equal to '0', perform another check
+      ret                          ; Otherwise, it is not a number; return
    
    is_above0:
-      cmp [si] , '9'               ; Se il valore è anche minore di '9' allora è indubbiamente un numero
-      jbe is_number                ; Il valore è un numero, salto al codice successivo
-      ret                          ; Se il valore è maggiore di 0 ma non minore di 9 allora non è sicuramente un numero (return)
+      cmp [si] , '9'               ; If it is also lower than or equal to '9', it is a digit
+      jbe is_number                ; The value is a number; continue
+      ret                          ; Otherwise, it is not a number; return
       
    is_number:
-      inc int_lenght               ; Tengo traccia di quanti numeri sono stati convertiti  
-      mov bx , 10                  ; Muovi il divisore
-      xor ah , ah                  ; Pulisco ah
-      mov al , [si]                ; Sposta in ax il contenuto della variabile (Numero da convertire)
-      sub al , '0'                 ; Converti in decimale 
-      mov cx , ax                  ; Sposta il numero corrente in CX
-      mov ax , result              ; Carico il risultato definitivo in AX
-      mul bx                       ; ax = ax * 10 (sposta a sinistra le cifre)
-      add ax , cx                  ; Somma il nuovo numero come unità
-      mov result , ax              ; Salva il nuovo risultato
-      inc si                       ; Passa al prossimo carattere
-      jmp analisi                  ; Quando il carattere attuale è stato convertito si procede con l'analisi stringa
+      inc int_lenght               ; Track how many digits have been converted
+      mov bx , 10                  ; Set the multiplier
+      xor ah , ah                  ; Clear AH
+      mov al , [si]                ; Move the character to AX for conversion
+      sub al , '0'                 ; Convert to decimal
+      mov cx , ax                  ; Move the current number to CX
+      mov ax , result              ; Load the accumulated result into AX
+      mul bx                       ; AX = AX * 10 (shift digits left)
+      add ax , cx                  ; Add the new digit as the units value
+      mov result , ax              ; Store the new result
+      inc si                       ; Move to the next character
+      jmp analisi                  ; Analyze the next character
 getInt endp
 
 
-; PROCEDURA - getOperator
-   ; Procedura che ottiene l'operazione da effettuare e la salva in una variabile
+; PROCEDURE - getOperator
+   ; Retrieves the operator and stores it in a variable
    
-   ; - Parametri -
-   ; Input completo utente = Scambiato tramite la variabile "op_input"
-   ; Operatore = Salvato dalla procedura nella variabile "op"     
+   ; - Parameters -
+   ; Complete user input = Passed through the "op_input" variable
+   ; Operator = Stored by the procedure in the "op" variable
    
    ; - Return - 
-   ; Ritorna quando termina l'operazione di get dell'operando
+   ; Returns when operator retrieval is complete
          
 getOperator proc
-   ; Inizializzazione
+   ; Initialization
       mov op , 0
    ; Get                           
-      lea si , op_input            ; Carico in si l'offset dell'input
-      mov bl , int_lenght          ; Carico il numero di cifre del primo numero in bl                 
-      xor bh , bh                  ; Pulisco bh
-      add si , bx                  ; Aggiungo all'offset le cifre già scambiate 
-      add si , 2                   ; Punto al valore corretto
-      mov bx , [si]                ; Carico in bx il valore puntato (operatore)
-      mov op , bl                  ; Salvo l'operatore nella variabile di scambio "op"
+      lea si , op_input            ; Load the input offset into SI
+      mov bl , int_lenght          ; Load the number of digits in the first number into BL
+      xor bh , bh                  ; Clear BH
+      add si , bx                  ; Advance past the digits already read
+      add si , 2                   ; Point to the correct value
+      mov bx , [si]                ; Load the pointed-to value (operator) into BX
+      mov op , bl                  ; Store the operator in the "op" variable
    ret     
 getOperator endp
 
 
-; Procedura - errorPrinter
-   ; Procedura che stampa "ERORR!!" se chiamata
+; PROCEDURE - errorPrinter
+   ; Prints "ERROR!!" when called
    
-   ; - Parametri -
-   ; Nessuno
+   ; - Parameters -
+   ; None
    
    ; - Return -
-   ; Alla fine della stampa
+   ; Returns after printing
    
 errorPrinter proc
    mov ah , 9h
@@ -352,265 +352,265 @@ errorPrinter endp
 
 
 
-; PROCEDURE PER OPERAZIONI
+; OPERATION PROCEDURES
 
-; Procedura - operationSum
-   ; Procedura che esegue la somma di due operandi 16 bit unsigned passati tramite stack
+; PROCEDURE - operationSum
+   ; Adds two 16-bit unsigned operands passed on the stack
    
-   ; - Parametri -
-   ; Operando 1 = Passato tramite lo stack e salvato in cx
-   ; Operando 2 = Passato tramite lo stack e salvato in bx
-   ; Risultato = Salvato nella variabile "result_string"  
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in CX
+   ; Operand 2 = Passed on the stack and stored in BX
+   ; Result = Stored in the "result_string" variable
    
-   ; - Ritorno -
-   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+   ; - Return -
+   ; Returns when the result has been converted to a printable string
   
 operationSum proc
-   ; Salvataggio dati
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop bx                          ; Salvo il secondo operando in bx
-      pop cx                          ; Salvo il primo operando in cx   
-   ; Somma
-      add bx , cx                     ; Faccio la somma (Risultato in bx)
-   ; Conversione 
-      mov ax , bx                     ; Salvo risultato in ax
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
-      push di                         ; Ripristino indirizzo di ritorno
+   ; Save data
+      pop di                          ; Save the return address in DI
+      pop bx                          ; Save the second operand in BX
+      pop cx                          ; Save the first operand in CX
+   ; Addition
+      add bx , cx                     ; Add the operands (result in BX)
+   ; Conversion
+      mov ax , bx                     ; Save the result in AX
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
+      push di                         ; Restore the return address
       ret                               
 operationSum endp 
 
 
-; Procedura - operationSub
-   ; Procedura che esegue la sottrazione di due numeri 16 bit unsigned passati tramite stack
+; PROCEDURE - operationSub
+   ; Subtracts two 16-bit unsigned numbers passed on the stack
    
-   ; - Parametri - 
-   ; Operando 1 = Passato tramite lo stack e salvato in cx
-   ; Operando 2 = Passato tramite lo stack e salvato in bx
-   ; Risultato = Salvato nella variabile "result_string"
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in CX
+   ; Operand 2 = Passed on the stack and stored in BX
+   ; Result = Stored in the "result_string" variable
    
    ; - Return -
-   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+   ; Returns when the result has been converted to a printable string
 
 operationSub proc
-   ; Salvataggio dati
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop cx                          ; Salvo il secondo operando in cx
-      pop bx                          ; Salvo il primo operando in bx   
-   ; Sottrazione
-      sub bx , cx                     ; Faccio la sottrazione 
-   ; Controllo signed
-      jns valid_operation             ; Se l'operazione ha restituito un numero unsigned allora continua
-      call errorPrinter               ; Altrimenti chiamo la procedura per scrivere errore ed eseguire nuovamente il programma 
+   ; Save data
+      pop di                          ; Save the return address in DI
+      pop cx                          ; Save the second operand in CX
+      pop bx                          ; Save the first operand in BX
+   ; Subtraction
+      sub bx , cx                     ; Subtract the operands
+   ; Signedness check
+      jns valid_operation             ; Continue if the operation produced an unsigned number
+      call errorPrinter               ; Otherwise print an error and run the program again
    valid_operation:
-   ; Conversione 
-      mov ax , bx                     ; Salvo risultato in ax
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
-      push di                         ; Ripristino indirizzo di ritorno
+   ; Conversion
+      mov ax , bx                     ; Save the result in AX
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
+      push di                         ; Restore the return address
       ret                                    
 operationSub endp
 
 
-; Procedura - operationMul
-   ; Procedura che esegue la moltiplicazione di due numeri unsigned 16 bit passati tramite stack
+; PROCEDURE - operationMul
+   ; Multiplies two 16-bit unsigned numbers passed on the stack
    
-   ; - Parametri -
-   ; Operando 1 = Passato tramite stack e salvato in bx
-   ; Operando 2 = Passato tramite stack e salvato in ax
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in BX
+   ; Operand 2 = Passed on the stack and stored in AX
    
    ; - Return -
-   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+   ; Returns when the result has been converted to a printable string
 
 operationMul proc
-   ; Salvataggio dati
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop ax                          ; Salvo il secondo operando in ax
-      pop bx                          ; Salvo il primo operando in bx   
-   ; Moltiplicazione
-      mul bx                          ; Risultato in ax
-   ; Conversione 
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
-      push di                         ; Ripristino indirizzo di ritorno
+   ; Save data
+      pop di                          ; Save the return address in DI
+      pop ax                          ; Save the second operand in AX
+      pop bx                          ; Save the first operand in BX
+   ; Multiplication
+      mul bx                          ; Result in AX
+   ; Conversion
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
+      push di                         ; Restore the return address
       ret
 operationMul endp
 
 
-; Procedura - operationDiv
-   ; Procedura che esegue la divisione di due numeri unsigned 16 bit passati tramite stack
+; PROCEDURE - operationDiv
+   ; Divides two 16-bit unsigned numbers passed on the stack
    
-   ; - Parametri - 
-   ; Operando 1 = Passato tramite stack e salvato in ax
-   ; Operando 2 = Passato tramite stack e salvato in bx
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in AX
+   ; Operand 2 = Passed on the stack and stored in BX
    
    ; - Return -
-   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+   ; Returns when the result has been converted to a printable string
 
 operationDiv proc 
-   ; Salvataggio dati
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop bx                          ; Salvo il secondo operando in bx
-      pop ax                          ; Salvo il primo operando in ax   
-   ; Divisione 
+   ; Save data
+      pop di                          ; Save the return address in DI
+      pop bx                          ; Save the second operand in BX
+      pop ax                          ; Save the first operand in AX
+   ; Division
       div cx
-   ; Conversione parte intera
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
+   ; Convert the integer part
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
       push di
       ret 
 operationDiv endp 
 
 
-; Procedura - operationPow
-   ; Procedura che esegue l'elevazione a potenza con parametri passati in stack
+; PROCEDURE - operationPow
+   ; Raises a number to a power using parameters passed on the stack
    
-   ; - Parametri - 
-   ; Operando 1 = Passato tramite stack e salvato in ax
-   ; Operando 2 = Passato tramite stack e salvato in cx
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in AX
+   ; Operand 2 = Passed on the stack and stored in CX
    
    ; - Return -
-   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+   ; Returns when the result has been converted to a printable string
 
 operationPow proc
-   ; Salvataggio dati
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop bx                          ; Salvo il secondo operando (esponente) in cx
-      pop ax                          ; Salvo il primo operando (base) in ax   
-   ; Esponente
-      dec cx                          ; Decremento l'esponente
-      mov bx , op1                    ; Copio la base in bx
-      mult_loop:                      ; Calcolo la potenza
+   ; Save data
+      pop di                          ; Save the return address in DI
+      pop bx                          ; Save the second operand (exponent) in CX
+      pop ax                          ; Save the first operand (base) in AX
+   ; Exponent
+      dec cx                          ; Decrement the exponent
+      mov bx , op1                    ; Copy the base to BX
+      mult_loop:                      ; Calculate the power
          mul bx                       
          loop mult_loop
-   ; Conversione
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
+   ; Conversion
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
       push di
       ret 
 operationPow endp   
 
 
-; Procedura - operationSqrt
-   ; Procedura che trova la radice quadrata di un numero in stack
+; PROCEDURE - operationSqrt
+   ; Finds the square root of a number passed on the stack
    
-   ; - Parametri - 
-   ; Operando 1 = Passato tramite stack e salvato in bx
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in BX
    
    ; - Return -
-   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+   ; Returns when the result has been converted to a printable string
 
 operationSqrt proc
-   ; Salvataggio dati
+   ; Save data
       xor ax , ax
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop bx                          ; Salvo il primo operando in bx  
-   ; Calcolo
-      mov cx , 1                      ; cx = 1 per sottrazioni dispari
+      pop di                          ; Save the return address in DI
+      pop bx                          ; Save the first operand in BX
+   ; Calculation
+      mov cx , 1                      ; CX = 1 for successive odd-number subtractions
       sqrt_loop:
-         sub bx, cx                   ; Sottraggo 1 da ax
-         jl done                      ; Se bx < 0 esco dal loop  
-         add cx, 2                    ; Incremento al prossimo numero dispari
-         inc ax                       ; Incremento risultato della radice quadrata
-      jmp sqrt_loop                   ; Ripeto
+         sub bx, cx                   ; Subtract the current odd number
+         jl done                      ; Exit the loop if BX < 0
+         add cx, 2                    ; Advance to the next odd number
+         inc ax                       ; Increment the square-root result
+      jmp sqrt_loop                   ; Repeat
    done: 
-   ; Conversione
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
+   ; Conversion
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
       push di
       ret 
 operationSqrt endp
 
 
-; Procedura - operationFact
-   ; Procedura che calcola il fattoriale di un numero passato tramite stack
+; PROCEDURE - operationFact
+   ; Calculates the factorial of a number passed on the stack
    
-   ; - Parametri - 
-   ; Operando 1 = Passato tramite stack e salvato in cx
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in CX
    
    ; - Return -
-   ; La procedura ritorna al termine della conversione 
+   ; Returns after the conversion is complete
 
 operationFact proc
-   ; Salvataggio dati
+   ; Save data
       mov ax , 1
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop cx                          ; Salvo il primo operando in cx  
-   ; Calcolo
+      pop di                          ; Save the return address in DI
+      pop cx                          ; Save the first operand in CX
+   ; Calculation
       fattoriale_loop:
-          cmp cx, 0                   ; Controlla se CX e' 0
-          je fine_fattoriale          ; Se CX e' 0, termina il ciclo
+          cmp cx, 0                   ; Check whether CX is 0
+          je fine_fattoriale          ; If CX is 0, end the loop
               
-          mul cx                      ; Moltiplica cx per ax 
-          dec cx                      ; Decrementa CX
-          jmp fattoriale_loop         ; Ripeti il ciclo
+          mul cx                      ; Multiply AX by CX
+          dec cx                      ; Decrement CX
+          jmp fattoriale_loop         ; Repeat the loop
    fine_fattoriale:
-   ; Conversione
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
+   ; Conversion
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
       push di
       ret       
 operationFact endp  
 
 
-; Procedura - operationAnd
-   ; Procedura che esegue l'operazione and bitwise tra due numeri
+; PROCEDURE - operationAnd
+   ; Performs a bitwise AND operation on two numbers
    
-   ; - Parametri - 
-   ; Operatore 1 = Passato tramite stack e salvato in ax
-   ; Operatore 2 = Passato tramite stack e salvato in cx
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in AX
+   ; Operand 2 = Passed on the stack and stored in CX
    
    ; - Return - 
-   ; Ritorna quando viene terminata la conversione 
+   ; Returns when conversion is complete
    
 operationAnd proc
-   ; Salvataggio dati
-   pop di                          ; Salvo indirizzo di ritorno in di
-   pop cx                          ; Salvo il secondo operando in cx
-   pop ax                          ; Salvo il primo operando in ax   
-   ; Operazione
+   ; Save data
+   pop di                          ; Save the return address in DI
+   pop cx                          ; Save the second operand in CX
+   pop ax                          ; Save the first operand in AX
+   ; Operation
    and ax , cx 
-   ; Conversione
+   ; Conversion
    lea si , result_string + 2
    call getString
-   ; Ritorno
+   ; Return
    push di
    ret  
 operationAnd endp
 
 
-; Procedura - operationOr
-   ; Procedura che esegue l'operazione or bitwise tra due numeri
+; PROCEDURE - operationOr
+   ; Performs a bitwise OR operation on two numbers
   
-   ; - Parametri - 
-   ; Operatore 1 = Passatro tramite stack e salvato in ax
-   ; Operatore 2 = Passato tramite stacke e salvato in cx
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in AX
+   ; Operand 2 = Passed on the stack and stored in CX
    
    ; - Return - 
-   ; Ritorna quando termina la conversione
+   ; Returns when conversion is complete
    
 operationOr proc
-   ; Salvataggio dati
-   pop di                          ; Salvo indirizzo di ritorno in di
-   pop cx                          ; Salvo il secondo operando in cx
-   pop ax                          ; Salvo il primo operando in ax   
-   ; Operazione
+   ; Save data
+   pop di                          ; Save the return address in DI
+   pop cx                          ; Save the second operand in CX
+   pop ax                          ; Save the first operand in AX
+   ; Operation
    or ax , cx
-   ; Conversione
+   ; Conversion
    lea si , result_string + 2
    call getString
-   ; Ritorno
+   ; Return
    push di
    ret   
 operationOr endp
 
-; FINE
+; END
    fine:                                                                    
       hlt

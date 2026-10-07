@@ -1,30 +1,30 @@
-; Procedura - operationSub
-   ; Procedura che esegue la sottrazione di due numeri 16 bit unsigned passati tramite stack
+; PROCEDURE - operationSub
+   ; Subtracts two 16-bit unsigned numbers passed on the stack
    
-   ; - Parametri - 
-   ; Operando 1 = Passato tramite lo stack e salvato in cx
-   ; Operando 2 = Passato tramite lo stack e salvato in bx
-   ; Risultato = Salvato nella variabile "result_string"
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in CX
+   ; Operand 2 = Passed on the stack and stored in BX
+   ; Result = Stored in the "result_string" variable
    
    ; - Return -
-   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+   ; Returns when the result has been converted to a printable string
 
 operationSub proc
-   ; Salvataggio dati
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop cx                          ; Salvo il secondo operando in cx
-      pop bx                          ; Salvo il primo operando in bx   
-   ; Sottrazione
-      sub bx , cx                     ; Faccio la sottrazione 
-   ; Controllo signed
-      jns valid_operation             ; Se l'operazione ha restituito un numero unsigned allora continua
-      call errorPrinter               ; Altrimenti chiamo la procedura per scrivere errore ed eseguire nuovamente il programma 
+   ; Save data
+      pop di                          ; Save the return address in DI
+      pop cx                          ; Save the second operand in CX
+      pop bx                          ; Save the first operand in BX
+   ; Subtraction
+      sub bx , cx                     ; Subtract the operands
+   ; Signedness check
+      jns valid_operation             ; Continue if the operation produced an unsigned number
+      call errorPrinter               ; Otherwise print an error and run the program again
    valid_operation:
-   ; Conversione 
-      mov ax , bx                     ; Salvo risultato in ax
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
-      push di                         ; Ripristino indirizzo di ritorno
+   ; Conversion
+      mov ax , bx                     ; Save the result in AX
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
+      push di                         ; Restore the return address
       ret                                    
 operationSub endp

@@ -1,28 +1,28 @@
-; PROCEDURE PER OPERAZIONI
+; OPERATION PROCEDURES
 
-; Procedura - operationSum
-   ; Procedura che esegue la somma di due operandi 16 bit unsigned passati tramite stack
+; PROCEDURE - operationSum
+   ; Adds two 16-bit unsigned operands passed on the stack
    
-   ; - Parametri -
-   ; Operando 1 = Passato tramite lo stack e salvato in cx
-   ; Operando 2 = Passato tramite lo stack e salvato in bx
-   ; Risultato = Salvato nella variabile "result_string"  
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in CX
+   ; Operand 2 = Passed on the stack and stored in BX
+   ; Result = Stored in the "result_string" variable
    
-   ; - Ritorno -
-   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+   ; - Return -
+   ; Returns when the result has been converted to a printable string
   
 operationSum proc
-   ; Salvataggio dati
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop bx                          ; Salvo il secondo operando in bx
-      pop cx                          ; Salvo il primo operando in cx   
-   ; Somma
-      add bx , cx                     ; Faccio la somma (Risultato in bx)
-   ; Conversione 
-      mov ax , bx                     ; Salvo risultato in ax
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
-      push di                         ; Ripristino indirizzo di ritorno
+   ; Save data
+      pop di                          ; Save the return address in DI
+      pop bx                          ; Save the second operand in BX
+      pop cx                          ; Save the first operand in CX
+   ; Addition
+      add bx , cx                     ; Add the operands (result in BX)
+   ; Conversion
+      mov ax , bx                     ; Save the result in AX
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
+      push di                         ; Restore the return address
       ret                               
 operationSum endp 

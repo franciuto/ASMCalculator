@@ -1,30 +1,30 @@
-; Procedura - operationFact
-   ; Procedura che calcola il fattoriale di un numero passato tramite stack
+; PROCEDURE - operationFact
+   ; Calculates the factorial of a number passed on the stack
    
-   ; - Parametri - 
-   ; Operando 1 = Passato tramite stack e salvato in cx
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in CX
    
    ; - Return -
-   ; La procedura ritorna al termine della conversione 
+   ; Returns after the conversion is complete
 
 operationFact proc
-   ; Salvataggio dati
+   ; Save data
       mov ax , 1
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop cx                          ; Salvo il primo operando in cx  
-   ; Calcolo
+      pop di                          ; Save the return address in DI
+      pop cx                          ; Save the first operand in CX
+   ; Calculation
       fattoriale_loop:
-          cmp cx, 0                   ; Controlla se CX e' 0
-          je fine_fattoriale          ; Se CX e' 0, termina il ciclo
+          cmp cx, 0                   ; Check whether CX is 0
+          je fine_fattoriale          ; If CX is 0, end the loop
               
-          mul cx                      ; Moltiplica cx per ax 
-          dec cx                      ; Decrementa CX
-          jmp fattoriale_loop         ; Ripeti il ciclo
+          mul cx                      ; Multiply AX by CX
+          dec cx                      ; Decrement CX
+          jmp fattoriale_loop         ; Repeat the loop
    fine_fattoriale:
-   ; Conversione
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
+   ; Conversion
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
       push di
       ret       
 operationFact endp  

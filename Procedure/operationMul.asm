@@ -1,24 +1,24 @@
-; Procedura - operationMul
-   ; Procedura che esegue la moltiplicazione di due numeri unsigned 16 bit passati tramite stack
+; PROCEDURE - operationMul
+   ; Multiplies two 16-bit unsigned numbers passed on the stack
    
-   ; - Parametri -
-   ; Operando 1 = Passato tramite stack e salvato in bx
-   ; Operando 2 = Passato tramite stack e salvato in ax
+   ; - Parameters -
+   ; Operand 1 = Passed on the stack and stored in BX
+   ; Operand 2 = Passed on the stack and stored in AX
    
    ; - Return -
-   ; Ritorna quando il risultato è stato convertito in stringa stampabile
+   ; Returns when the result has been converted to a printable string
 
 operationMul proc
-   ; Salvataggio dati
-      pop di                          ; Salvo indirizzo di ritorno in di
-      pop ax                          ; Salvo il secondo operando in ax
-      pop bx                          ; Salvo il primo operando in bx   
-   ; Moltiplicazione
-      mul bx                          ; Risultato in ax
-   ; Conversione 
-      lea si , result_string + 2      ; Carico l'indirizzo della variabile risultato
-      call getString                  ; Converto da intero a stringa
-   ; Ritorno
-      push di                         ; Ripristino indirizzo di ritorno
+   ; Save data
+      pop di                          ; Save the return address in DI
+      pop ax                          ; Save the second operand in AX
+      pop bx                          ; Save the first operand in BX
+   ; Multiplication
+      mul bx                          ; Result in AX
+   ; Conversion
+      lea si , result_string + 2      ; Load the result variable address
+      call getString                  ; Convert the integer to a string
+   ; Return
+      push di                         ; Restore the return address
       ret
 operationMul endp
