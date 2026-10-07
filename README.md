@@ -1,56 +1,55 @@
+# Assembly Calculator (emu8086)
 
-# Calcolatrice in Assembly (emu8086)
+## Description
+This project implements an **Assembly calculator** using emu8086. The calculator can perform arithmetic and bitwise operations on 16-bit unsigned integers.
 
-## Descrizione
-Questo progetto implementa una **calcolatrice in Assembly** utilizzando l'emu8086. La calcolatrice è in grado di eseguire operazioni matematiche e bitwise su numeri interi non firmati (unsigned) a 16 bit.
+## Supported Operations
+The calculator supports the following operations:
 
-## Operazioni Supportate
-La calcolatrice può eseguire le seguenti operazioni:
+1. **Addition**
+2. **Subtraction**
+3. **Multiplication**
+4. **Division**
+5. **Exponentiation**
+6. **Factorial**
+7. **Bitwise AND**
+8. **Bitwise OR**
+9. **Square root**
 
-1. **Somma**
-2. **Sottrazione**
-3. **Moltiplicazione**
-4. **Divisione**
-5. **Potenza**
-6. **Fattoriale**
-7. **AND bitwise**
-8. **OR bitwise**
-9. **Radice quadrata**
+## Technical Details
+- **Supported numbers:** 16-bit unsigned integers (0–65,535).
+- **Input:** The program uses the US keyboard layout.
+  - If you are using a different layout, refer to a US keyboard layout chart or modify the operation selection code block.
 
-## Dettagli Tecnici
-- **Numeri supportati:** interi unsigned a 16 bit (0 - 65535).
-- **Input:** Il programma utilizza il layout di tastiera americana (US).
-  - Se stai utilizzando un layout diverso, consulta una tabella della tastiera americana o modifica il blocco di codice per la selezione delle operazioni.
+## Requirements
+- **emu8086:** An 8086 emulator required to run the Assembly code.
+- **US keyboard layout** (or code modifications to accommodate a different layout).
 
-## Requisiti
-- **emu8086**: un emulatore 8086 necessario per eseguire il codice assembly.
-- **Tastiera con layout americano** (o modifiche nel codice per adattare il layout).
+## Usage Instructions
+1. **Keyboard Layout Configuration:**
+   - Make sure your keyboard layout is set to "US" to select operations correctly.
+   - Alternatively, you can modify the `SCELTA OPERAZIONE` (operation selection) code block in the `ASMCalculator.asm` file to match your keyboard layout.
 
-## Istruzioni per l'Uso
-1. **Modifica del Layout della Tastiera:**
-   - Assicurati di impostare il layout della tastiera su "Americano (US)" per una corretta selezione delle operazioni.
-   - In alternativa, puoi modificare il blocco di codice "SCELTA OPERAZIONE" nel file `ASMCalculator.asm` per adattarlo al tuo layout.
+2. **Compilation and Execution:**
+   - Open the `ASMCalculator.asm` file in emu8086.
+   - Compile the source code.
+   - Run the program directly in emu8086.
 
-2. **Compilazione ed Esecuzione:**
-   - Apri il file `ASMCalculator.asm` nell'emu8086.
-   - Compila il codice sorgente.
-   - Esegui il programma direttamente nell'emu8086.
+3. **Operation Selection:**
+   - Follow the on-screen instructions to select the desired operation and enter the input numbers.
 
-3. **Selezione delle Operazioni:**
-   - Segui le istruzioni a schermo per scegliere l'operazione desiderata e inserire i numeri di input.
-
-## Note Importanti
-- **Precisione:**
-  - La divisione utilizza numeri interi (non sono supportati i numeri decimali).
-  - La radice quadrata restituisce solo la parte intera.
+## Important Notes
+- **Precision:**
+  - Division uses integer arithmetic (decimal numbers are not supported).
+  - The square root operation returns only the integer part.
 
 - **Overflow:**
-  - Il programma non gestisce automaticamente casi di overflow. Inserire numeri troppo grandi può causare risultati errati.
+  - The program does not automatically handle overflow. Entering numbers that are too large may produce incorrect results.
 
-## Modifiche Personalizzate
-Se desideri cambiare il comportamento del programma, puoi:
-- Modificare le assegnazioni di input nel blocco `SCELTA OPERAZIONE` per adattarlo al tuo layout di tastiera.
-- Aggiungere nuove operazioni seguendo lo stile del codice esistente
+## Customization
+To change the program's behavior, you can:
+- Modify the input mappings in the `SCELTA OPERAZIONE` code block to match your keyboard layout.
+- Add new operations following the existing code style.
 
-## Licenza
-Questo progetto è distribuito sotto la licenza MIT. Consulta il file `LICENSE` (se incluso) per maggiori dettagli.
+## License
+This project is distributed under the MIT License. See the `LICENSE` file (if included) for more details.
